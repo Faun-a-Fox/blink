@@ -3,18 +3,25 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-BlinkWindow::BlinkWindow(QWidget *parent) :
-    QMainWindow(parent),
-    blinking(false),
-    counter(0)
+BlinkWindow::BlinkWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , blinking(false)
+    , counter(0)
+    , blinkDuration(150)
+    , blinkInterval(6000)
+    , lightness(1.0)
+    , opacity(1.0)
+
 {
-    setWindowFlags(windowFlags() |
-                   Qt::X11BypassWindowManagerHint |
-                   Qt::CustomizeWindowHint |
-                   Qt::FramelessWindowHint |
-                   Qt::WindowStaysOnTopHint |
-                   Qt::WindowTransparentForInput |
-                   Qt::WindowDoesNotAcceptFocus);
+    setWindowFlags( windowFlags()
+                    | Qt::Tool // Hides taskbar entry
+                    | Qt::CustomizeWindowHint //hides title bar
+                    | Qt::FramelessWindowHint //hides frame
+                    | Qt::WindowStaysOnTopHint //makes window the top layer
+                    | Qt::WindowTransparentForInput //enables click-through
+                    | Qt::WindowDoesNotAcceptFocus //makes impossibe to focus
+                    | Qt::X11BypassWindowManagerHint //all of the above on X11 systems (linux)
+                    );
 
     //set geometry to cover all available screens
     QRect geometry;
@@ -33,11 +40,16 @@ BlinkWindow::BlinkWindow(QWidget *parent) :
     }
     setGeometry(geometry);
 
-    setStyleSheet("background-color: white;");
-
-    //initialize the timer
+    //initialize the blink timer
     blinker.connect(&blinker, &QTimer::timeout, this, &BlinkWindow::blink);
     blinker.start(0);
+
+    //call setters just in case they have some custom code to run
+    setBlinkDuration(blinkDuration);
+    setBlinkInterval(blinkInterval);
+    setLightness(lightness);
+    setOpacity(opacity);
+
 }
 
 BlinkWindow::~BlinkWindow()
@@ -48,21 +60,50 @@ void BlinkWindow::blink()
 {
     if((blinking = !blinking))
     {
-        //blink
+        ///blink
+
         ++counter;
-        setWindowOpacity(1);
-        blinker.start(100);
+        // raise above anything displayed since last blink
+        raise();
+        // make visible
+        setWindowOpacity(opacity);
+        // start blink timer
+        blinker.start(blinkDuration);
     }
     else
     {
-        //unblink
+        ///unblink
+
+        // make transparent
         setWindowOpacity(0);
-        blinker.start(6000);
+        // timer set to gap betwwen blinks
+        blinker.start(blinkInterval - blinkDuration);
 
     }
 
 }
 
+void BlinkWindow::setBlinkDuration(int blinkDuration)
+{
+    this->blinkDuration = blinkDuration;
+}
+void BlinkWindow::setBlinkInterval(int blinkInterval)
+{
+    this->blinkInterval = blinkInterval;
+}
+void BlinkWindow::setLightness(qreal lightness)
+{
+    this->lightness = lightness;
+    QColor color;
+    color.setHslF(0.0,0.0,lightness);
+    QPalette pal = palette();
+    pal.setColor(QPalette::Background, color);
+    setPalette(pal);
+}
+void BlinkWindow::setOpacity(qreal opacity)
+{
+    this->opacity = opacity;
+}
 
 
 

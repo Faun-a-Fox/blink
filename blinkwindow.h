@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+//#include <QSystemTrayIcon>
 
 class BlinkWindow : public QMainWindow
 {
@@ -15,11 +16,22 @@ public:
 public slots:
     void blink();
 
+    void setBlinkDuration(int blinkDuration);
+    void setBlinkInterval(int blinkInterval);
+    void setLightness(qreal lightness);
+    void setOpacity(qreal opacity);
+
 private:
+    //QSystemTrayIcon trayIcon;
     QTimer blinker;
     bool blinking;
 
     int counter;
+
+    int blinkDuration;
+    int blinkInterval;
+    qreal lightness;
+    qreal opacity;
 
 };
 
