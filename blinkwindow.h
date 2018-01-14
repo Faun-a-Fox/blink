@@ -2,8 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMenu>
+#include <QSettings>
+#include <QSystemTrayIcon>
 #include <QTimer>
-//#include <QSystemTrayIcon>
 
 class BlinkWindow : public QMainWindow
 {
@@ -13,16 +15,21 @@ public:
     explicit BlinkWindow(QWidget *parent = 0);
     ~BlinkWindow();
 
-public slots:
+private slots:
     void blink();
 
-    void setBlinkDuration(int blinkDuration);
-    void setBlinkInterval(int blinkInterval);
-    void setLightness(qreal lightness);
-    void setOpacity(qreal opacity);
+    void setBlinkDuration();
+    void setBlinkInterval();
+    void setLightness();
+    void setOpacity();
 
 private:
-    //QSystemTrayIcon trayIcon;
+    void updateColor();
+
+    QSettings* settings;
+    QSystemTrayIcon* trayIcon;
+    QMenu* menu;
+
     QTimer blinker;
     bool blinking;
 

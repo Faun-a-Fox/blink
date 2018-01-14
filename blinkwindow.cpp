@@ -2,17 +2,36 @@
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QInputDialog>
 
 BlinkWindow::BlinkWindow(QWidget *parent)
     : QMainWindow(parent)
     , blinking(false)
     , counter(0)
-    , blinkDuration(150)
+    , blinkDuration(100)
     , blinkInterval(6000)
     , lightness(1.0)
-    , opacity(1.0)
+    , opacity(0.9)
 
 {
+    /// INIT APPLICATION
+
+    QCoreApplication::setApplicationName("Blink");
+    QCoreApplication::setOrganizationName("Faun-a-Fox");
+    QCoreApplication::setOrganizationDomain("https://github.com/Faun-a-Fox/blink");
+
+    /// INIT SETTINGS
+
+    settings = new QSettings("BlinkConfig.ini", QSettings::IniFormat, this);
+    settings->setValue("blinkDuration", blinkDuration = settings->value("blinkDuration", blinkDuration).toInt() );
+    settings->setValue("blinkInterval", blinkInterval = settings->value("blinkInterval", blinkInterval).toInt() );
+    settings->setValue("lightness", lightness = settings->value("lightness", lightness).toDouble() );
+    settings->setValue("opacity", opacity = settings->value("opacity", opacity).toDouble() );
+    settings->sync();
+
+    /// INIT WINDOW PROPERTIES
+
+    // set flags
     setWindowFlags( windowFlags()
                     | Qt::Tool // Hides taskbar entry
                     | Qt::CustomizeWindowHint //hides title bar
@@ -23,7 +42,7 @@ BlinkWindow::BlinkWindow(QWidget *parent)
                     | Qt::X11BypassWindowManagerHint //all of the above on X11 systems (linux)
                     );
 
-    //set geometry to cover all available screens
+    // set geometry to cover all available screen space on all screens
     QRect geometry;
     int screen_amount = QApplication::desktop()->numScreens();
     for(int i=0; i<screen_amount; ++i)
@@ -40,20 +59,39 @@ BlinkWindow::BlinkWindow(QWidget *parent)
     }
     setGeometry(geometry);
 
-    //initialize the blink timer
+    // set correct color
+    updateColor();
+
+    /// INIT TRAY ICON & MENU
+
+    menu = new QMenu("Blink", this);
+    menu->addAction("Duration", this, SLOT(setBlinkDuration()) );
+    menu->addAction("Interval", this, SLOT(setBlinkInterval()) );
+    menu->addAction("Lightness", this, SLOT(setLightness()) );
+    menu->addAction("Opacity", this, SLOT(setOpacity()) );
+    menu->addSeparator();
+    menu->addAction("Quit", QApplication::instance(), SLOT(quit()) );
+
+    trayIcon = new QSystemTrayIcon(QIcon("blink-32.png") ,this);
+    trayIcon->setToolTip("Blink");
+    trayIcon->setContextMenu(menu);
+    trayIcon->show();
+
+    /// START BLINKING
+
+    // initialize the blink timer to start the blinking
     blinker.connect(&blinker, &QTimer::timeout, this, &BlinkWindow::blink);
     blinker.start(0);
-
-    //call setters just in case they have some custom code to run
-    setBlinkDuration(blinkDuration);
-    setBlinkInterval(blinkInterval);
-    setLightness(lightness);
-    setOpacity(opacity);
 
 }
 
 BlinkWindow::~BlinkWindow()
 {
+    settings->setValue("blinkDuration", blinkDuration);
+    settings->setValue("blinkInterval", blinkInterval);
+    settings->setValue("lightness", lightness);
+    settings->setValue("opacity", opacity);
+    settings->sync();
 }
 
 void BlinkWindow::blink()
@@ -78,37 +116,34 @@ void BlinkWindow::blink()
         setWindowOpacity(0);
         // timer set to gap betwwen blinks
         blinker.start(blinkInterval - blinkDuration);
-
     }
 
 }
 
-void BlinkWindow::setBlinkDuration(int blinkDuration)
+void BlinkWindow::setBlinkDuration()
 {
-    this->blinkDuration = blinkDuration;
+    blinkDuration = QInputDialog::getInt(this, "Set Duration", "Blink Duartion (0 - 500 ms)", blinkDuration, 0, 500, 25);
 }
-void BlinkWindow::setBlinkInterval(int blinkInterval)
+void BlinkWindow::setBlinkInterval()
 {
-    this->blinkInterval = blinkInterval;
+    blinkInterval = QInputDialog::getInt(this, "Set Interval", "Blink Interval (1 - 30 sec)", blinkInterval/1000, 1, 30, 1) * 1000;
 }
-void BlinkWindow::setLightness(qreal lightness)
+void BlinkWindow::setLightness()
 {
-    this->lightness = lightness;
+    lightness = QInputDialog::getInt(this, "Set Lightness", "Lightness (0 - 100%)", lightness*100, 0, 100, 10) / 100.0;
+
+    updateColor();
+}
+void BlinkWindow::setOpacity()
+{
+    opacity = QInputDialog::getInt(this, "Set Opacity", "Opacity (0 - 100%)", opacity*100, 0, 100, 10) / 100.0;
+}
+
+void BlinkWindow::updateColor()
+{
     QColor color;
     color.setHslF(0.0,0.0,lightness);
     QPalette pal = palette();
     pal.setColor(QPalette::Background, color);
     setPalette(pal);
 }
-void BlinkWindow::setOpacity(qreal opacity)
-{
-    this->opacity = opacity;
-}
-
-
-
-
-
-
-
-
