@@ -14,12 +14,6 @@ BlinkWindow::BlinkWindow(QWidget *parent)
     , opacity(0.9)
 
 {
-    /// INIT APPLICATION
-
-    QCoreApplication::setApplicationName("Blink");
-    QCoreApplication::setOrganizationName("Faun-a-Fox");
-    QCoreApplication::setOrganizationDomain("https://github.com/Faun-a-Fox/blink");
-
     /// INIT SETTINGS
 
     settings = new QSettings("BlinkConfig.ini", QSettings::IniFormat, this);
@@ -126,7 +120,7 @@ void BlinkWindow::setBlinkDuration()
 }
 void BlinkWindow::setBlinkInterval()
 {
-    blinkInterval = QInputDialog::getInt(this, "Set Interval", "Blink Interval (1 - 30 sec)", blinkInterval/1000, 1, 30, 1) * 1000;
+    blinkInterval = QInputDialog::getInt(this, "Set Interval", "Blink Interval (1000 - 30000 ms)", blinkInterval, 1000, 30000, 500);
 }
 void BlinkWindow::setLightness()
 {
