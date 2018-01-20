@@ -25,13 +25,6 @@ Blink::Blink(QWidget *parent)
     settings->setValue("opacity", opacity = settings->value("opacity", opacity).toDouble() );
     settings->sync();
 
-    /// INIT OVERLAY
-
-    blinkOverlay = new OverlayWindow();
-    blinkOverlay->setGeometry(QApplication::desktop()->rect());
-    blinkOverlay->setColor(QColor::fromHslF(0.0, 0.0, lightness) );
-    blinkOverlay->setOpacity(opacity);
-
     /// INIT TRAY ICON & MENU
 
     trayMenu = new QMenu("Blink");
@@ -47,11 +40,31 @@ Blink::Blink(QWidget *parent)
     trayIcon->setContextMenu(trayMenu);
     trayIcon->show();
 
+    /// INIT OVERLAY
+
+    blinkOverlay = new OverlayWindow();
+    blinkOverlay->setGeometry(QApplication::desktop()->rect());
+    blinkOverlay->setColor(QColor::fromHslF(0.0, 0.0, lightness) );
+    blinkOverlay->setOpacity(opacity);
+
+    blinkTimerBar = new OverlayWindow();
+    QRect r = QApplication::desktop()->screen()->rect();
+    r.setHeight(3);
+    blinkTimerBar->setGeometry(r);
+    blinkTimerBar->setColor(Qt::red);
+    blinkTimerBar->show();
+
+    blinkAnimation = new QPropertyAnimation(blinkTimerBar, "geometry", this);
+    //blinkAnimation->setStartValue(blinkTimerBar->rect().adjusted(0,0,0,1-blinkTimerBar->rect().width()));
+    blinkAnimation->setStartValue(QRect(blinkTimerBar->rect().topLeft(),QPoint(1,3)));
+    blinkAnimation->setEndValue(blinkTimerBar->rect());
+
     /// START BLINKING
 
     // initialize the blink timer to start the blinking
-    connect(&blinkTimer, SIGNAL(timeout()), this, SLOT(blink()) );
-    blinkTimer.start(0);
+    blinkTimer = new QTimer(this);
+    connect(blinkTimer, SIGNAL(timeout()), this, SLOT(blink()) );
+    blinkTimer->start(0);
 }
 
 Blink::~Blink()
@@ -64,8 +77,9 @@ Blink::~Blink()
     settings->sync();
 
     // delete all parent-less objects
-    delete blinkOverlay;
     delete trayMenu;
+    delete blinkOverlay;
+    delete blinkTimerBar;
 }
 
 void Blink::blink()
@@ -83,8 +97,11 @@ void Blink::blink()
         blinkOverlay->setOpacity(opacity);
         blinkOverlay->show();
 
+        blinkTimerBar->hide();
+
         // start blink timer
-        blinkTimer.start(blinkDuration);
+        blinkTimer->start(blinkDuration);
+
     }
     else
     {
@@ -93,8 +110,15 @@ void Blink::blink()
         // hide overlay
         blinkOverlay->hide();
 
+        int t = blinkInterval - blinkDuration;
+
+
+        blinkAnimation->setDuration(t);
+        blinkAnimation->start();
+        blinkTimerBar->show();
+
         // timer set to gap betwwen blinks
-        blinkTimer.start(blinkInterval - blinkDuration);
+        blinkTimer->start(t);
     }
 
 }
