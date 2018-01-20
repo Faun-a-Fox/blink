@@ -12,6 +12,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+CONFIG += c++14
+
 TARGET = Blink
 TEMPLATE = app
 
@@ -24,9 +26,11 @@ VERSION = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_PATCH}
 
 
 SOURCES += main.cpp \
-    blinkwindow.cpp
+    OverlayWindow.cpp \
+    Blink.cpp
 
 HEADERS  += \
-    blinkwindow.h
+    OverlayWindow.h \
+    Blink.h
 
 FORMS    +=
