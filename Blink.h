@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "OverlayWindow.h"
+#include "settingsdialog.h"
 
 #include <QMenu>
 #include <QPropertyAnimation>
@@ -20,6 +21,8 @@ public:
 private slots:
     void blink();
 
+    void openSettings();
+
     void setBlinkDuration();
     void setBlinkInterval();
     void setLightness();
@@ -29,6 +32,7 @@ private:
     /// COMPONENTS
 
     /// CORE
+    SettingsDialog*  settingsDialog;
     QSettings*       settings;  // Stored settings
     QSystemTrayIcon* trayIcon;  // Tray icon
     QMenu*           trayMenu;  // Menu of tray icon

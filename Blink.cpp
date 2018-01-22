@@ -25,9 +25,15 @@ Blink::Blink(QWidget *parent)
     settings->setValue("opacity", opacity = settings->value("opacity", opacity).toDouble() );
     settings->sync();
 
+    settingsDialog = new SettingsDialog;
+
     /// INIT TRAY ICON & MENU
 
     trayMenu = new QMenu("Blink");
+
+    trayMenu->addAction("Settings", this, SLOT(openSettings()) );
+    trayMenu->addSeparator();
+
     trayMenu->addAction("Duration", this, SLOT(setBlinkDuration()) );
     trayMenu->addAction("Interval", this, SLOT(setBlinkInterval()) );
     trayMenu->addAction("Lightness", this, SLOT(setLightness()) );
@@ -121,6 +127,12 @@ void Blink::blink()
         blinkTimer->start(t);
     }
 
+}
+
+void Blink::openSettings()
+{
+    settingsDialog->open();
+    settingsDialog->ui;
 }
 
 void Blink::setBlinkDuration()

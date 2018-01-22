@@ -27,10 +27,13 @@ VERSION = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_PATCH}
 
 SOURCES += main.cpp \
     OverlayWindow.cpp \
-    Blink.cpp
+    Blink.cpp \
+    settingsdialog.cpp
 
 HEADERS  += \
     OverlayWindow.h \
-    Blink.h
+    Blink.h \
+    settingsdialog.h
 
-FORMS    +=
+FORMS    += \
+    settingsdialog.ui
