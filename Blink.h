@@ -28,6 +28,9 @@ private slots:
     void setLightness();
     void setOpacity();
 
+    void loadSettings();
+    void saveSettings();
+
 private:
     /// COMPONENTS
 
@@ -55,8 +58,8 @@ private:
 
     int blinkDuration; // Duration of the blinks in ms
     int blinkInterval; // Interval between the beginning of consequtive blinks
-    qreal lightness;   // Lightness value of the blink overlay
-    qreal opacity;     // Opacity value of the blink overlay
+    QColor blinkColor; // Color of the blink overlay
+    int blinkOpacity;  // Opacity value of the blink overlay (percent)
 
 };
 

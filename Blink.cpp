@@ -1,4 +1,5 @@
 #include "Blink.h"
+#include "settingsdef.h"
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -12,20 +13,18 @@ Blink::Blink(QWidget *parent)
     // Defaults
     , blinkDuration(100)
     , blinkInterval(6000)
-    , lightness(1.0)
-    , opacity(0.9)
+    , blinkColor(Qt::white)
+    , blinkOpacity(100)
 
 {
     /// INIT SETTINGS
-
-    settings = new QSettings("BlinkConfig.ini", QSettings::IniFormat, this);
-    settings->setValue("blinkDuration", blinkDuration = settings->value("blinkDuration", blinkDuration).toInt() );
-    settings->setValue("blinkInterval", blinkInterval = settings->value("blinkInterval", blinkInterval).toInt() );
-    settings->setValue("lightness", lightness = settings->value("lightness", lightness).toDouble() );
-    settings->setValue("opacity", opacity = settings->value("opacity", opacity).toDouble() );
+    settings = new QSettings(SET_FILENAME, QSettings::IniFormat, this);
+    settings->setValue(SET_BLINKENABLED_BOOL, settings->value(SET_BLINKENABLED_BOOL, true).toBool() );
+    settings->setValue(SET_BLINKDURATION_INT, blinkDuration = settings->value(SET_BLINKDURATION_INT, blinkDuration).toInt() );
+    settings->setValue(SET_BLINKINTERVAL_INT, blinkInterval = settings->value(SET_BLINKINTERVAL_INT, blinkInterval).toInt() );
+    settings->setValue(SET_BLINKCOLOR_STR, (blinkColor = settings->value(SET_BLINKCOLOR_STR, blinkColor.name()).value<QColor>()).name() );
+    settings->setValue(SET_BLINKOPACITY_INT, blinkOpacity = settings->value(SET_BLINKOPACITY_INT, blinkOpacity).toInt() );
     settings->sync();
-
-    settingsDialog = new SettingsDialog;
 
     /// INIT TRAY ICON & MENU
 
@@ -34,11 +33,11 @@ Blink::Blink(QWidget *parent)
     trayMenu->addAction("Settings", this, SLOT(openSettings()) );
     trayMenu->addSeparator();
 
-    trayMenu->addAction("Duration", this, SLOT(setBlinkDuration()) );
-    trayMenu->addAction("Interval", this, SLOT(setBlinkInterval()) );
-    trayMenu->addAction("Lightness", this, SLOT(setLightness()) );
-    trayMenu->addAction("Opacity", this, SLOT(setOpacity()) );
-    trayMenu->addSeparator();
+    //trayMenu->addAction("Duration", this, SLOT(setBlinkDuration()) );
+    //trayMenu->addAction("Interval", this, SLOT(setBlinkInterval()) );
+    //trayMenu->addAction("Lightness", this, SLOT(setLightness()) );
+    //trayMenu->addAction("Opacity", this, SLOT(setOpacity()) );
+    //trayMenu->addSeparator();
     trayMenu->addAction("Quit", QApplication::instance(), SLOT(quit()) );
 
     trayIcon = new QSystemTrayIcon(QIcon("blink-32.png"), this);
@@ -50,18 +49,17 @@ Blink::Blink(QWidget *parent)
 
     blinkOverlay = new OverlayWindow();
     blinkOverlay->setGeometry(QApplication::desktop()->rect());
-    blinkOverlay->setColor(QColor::fromHslF(0.0, 0.0, lightness) );
-    blinkOverlay->setOpacity(opacity);
+    blinkOverlay->setColor(blinkColor);
+    blinkOverlay->setOpacity(blinkOpacity);
 
     blinkTimerBar = new OverlayWindow();
-    QRect r = QApplication::desktop()->screen()->rect();
+    QRect r = QApplication::desktop()->screenGeometry(-1);
     r.setHeight(3);
     blinkTimerBar->setGeometry(r);
     blinkTimerBar->setColor(Qt::red);
     blinkTimerBar->show();
 
     blinkAnimation = new QPropertyAnimation(blinkTimerBar, "geometry", this);
-    //blinkAnimation->setStartValue(blinkTimerBar->rect().adjusted(0,0,0,1-blinkTimerBar->rect().width()));
     blinkAnimation->setStartValue(QRect(blinkTimerBar->rect().topLeft(),QPoint(1,3)));
     blinkAnimation->setEndValue(blinkTimerBar->rect());
 
@@ -75,22 +73,18 @@ Blink::Blink(QWidget *parent)
 
 Blink::~Blink()
 {
-    //save settings
-    settings->setValue("blinkDuration", blinkDuration);
-    settings->setValue("blinkInterval", blinkInterval);
-    settings->setValue("lightness", lightness);
-    settings->setValue("opacity", opacity);
-    settings->sync();
+    saveSettings();
 
     // delete all parent-less objects
     delete trayMenu;
     delete blinkOverlay;
     delete blinkTimerBar;
+    delete settingsDialog;
 }
 
 void Blink::blink()
 {
-    if((isBlinking = !isBlinking))
+    if( (isBlinking = !isBlinking) )
     {
         /// BLINK
 
@@ -99,8 +93,8 @@ void Blink::blink()
 
         // set overlay properties and show it
         blinkOverlay->raise();
-        blinkOverlay->setColor(QColor::fromHslF(0.0,0.0,lightness));
-        blinkOverlay->setOpacity(opacity);
+        blinkOverlay->setColor(blinkColor);
+        blinkOverlay->setOpacity(blinkOpacity);
         blinkOverlay->show();
 
         blinkTimerBar->hide();
@@ -123,7 +117,7 @@ void Blink::blink()
         blinkAnimation->start();
         blinkTimerBar->show();
 
-        // timer set to gap betwwen blinks
+        // timer set to gap between blinks
         blinkTimer->start(t);
     }
 
@@ -131,8 +125,10 @@ void Blink::blink()
 
 void Blink::openSettings()
 {
-    settingsDialog->open();
-    settingsDialog->ui;
+    auto dialog = new SettingsDialog(settings);
+    connect(dialog, &SettingsDialog::accepted, this, &Blink::loadSettings);
+    connect(dialog, &SettingsDialog::finished, dialog, &SettingsDialog::deleteLater);
+    dialog->open();
 }
 
 void Blink::setBlinkDuration()
@@ -145,9 +141,27 @@ void Blink::setBlinkInterval()
 }
 void Blink::setLightness()
 {
-    lightness = QInputDialog::getInt(nullptr, "Set Lightness", "Lightness (0 - 100%)", lightness*100, 0, 100, 10) / 100.0;
+    //blinkColor = QInputDialog::getInt(nullptr, "Set Lightness", "Lightness (0 - 100%)", blinkColor*100, 0, 100, 10) / 100.0;
 }
 void Blink::setOpacity()
 {
-    opacity = QInputDialog::getInt(nullptr, "Set Opacity", "Opacity (0 - 100%)", opacity*100, 0, 100, 10) / 100.0;
+    blinkOpacity = QInputDialog::getInt(nullptr, "Set Opacity", "Opacity (0 - 100%)", blinkOpacity, 0, 100, 10);
+}
+
+void Blink::saveSettings()
+{
+    settings->setValue(SET_BLINKDURATION_INT, blinkDuration);
+    settings->setValue(SET_BLINKINTERVAL_INT, blinkInterval);
+    settings->setValue(SET_BLINKCOLOR_STR, blinkColor.name());
+    settings->setValue(SET_BLINKOPACITY_INT, blinkOpacity);
+    settings->sync();
+}
+
+void Blink::loadSettings()
+{
+    //settings->value(SET_BLINKENABLED_BOOL, true).toBool();
+    blinkDuration = settings->value(SET_BLINKDURATION_INT).toInt();
+    blinkInterval = settings->value(SET_BLINKINTERVAL_INT).toInt();
+    blinkColor = QColor(settings->value(SET_BLINKCOLOR_STR).toString());
+    blinkOpacity = settings->value(SET_BLINKOPACITY_INT).toInt();
 }

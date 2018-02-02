@@ -33,7 +33,8 @@ SOURCES += main.cpp \
 HEADERS  += \
     OverlayWindow.h \
     Blink.h \
-    settingsdialog.h
+    settingsdialog.h \
+    settingsdef.h
 
 FORMS    += \
     settingsdialog.ui

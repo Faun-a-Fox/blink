@@ -30,10 +30,11 @@ void OverlayWindow::setColor(const QColor color)
 }
 
 
-void OverlayWindow::setOpacity(const qreal opacity)
+void OverlayWindow::setOpacity(const int opacity)
 {
-    if(opacity != windowOpacity())
+    qreal f = opacity / 100.0f;
+    if(f != windowOpacity())
     {
-        setWindowOpacity(opacity);
+        setWindowOpacity(f);
     }
 }

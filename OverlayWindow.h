@@ -16,7 +16,7 @@ public:
 
 public slots:
     void setColor(const QColor color);
-    void setOpacity(const qreal opacity);
+    void setOpacity(const int opacity);
 
 };
 
