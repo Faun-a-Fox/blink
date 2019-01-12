@@ -23,28 +23,18 @@ private slots:
 
     void openSettings();
 
-    void setBlinkDuration();
-    void setBlinkInterval();
-    void setLightness();
-    void setOpacity();
-
-    void loadSettings();
-    void saveSettings();
-
 private:
     /// COMPONENTS
 
     /// CORE
-    SettingsDialog*  settingsDialog;
     QSettings*       settings;  // Stored settings
     QSystemTrayIcon* trayIcon;  // Tray icon
     QMenu*           trayMenu;  // Menu of tray icon
 
     /// BLINKING
-    QTimer*        blinkTimer;    // Timer used to keep track when to blink or unblink
-    OverlayWindow* blinkTimerBar; // Visaul display of the timer
-    OverlayWindow* blinkOverlay;  // The blink overlay itself
-    QPropertyAnimation* blinkAnimation;
+    QTimer*             blinkTimer;    // Timer used to keep track when to blink or unblink
+    OverlayWindow*      blinkTimerBar; // Visaul display of the timer
+    OverlayWindow*      blinkOverlay;  // The blink overlay itself
 
     /// FLOW-ER
     //QTimer*        flowTimer;    //
@@ -53,13 +43,7 @@ private:
 
     /// STATUS VARIABLES
 
-    bool isBlinking;   // is currently the blink overlay is being displayed?
     int blinkCounter;  // Number of times blinked since start
-
-    int blinkDuration; // Duration of the blinks in ms
-    int blinkInterval; // Interval between the beginning of consequtive blinks
-    QColor blinkColor; // Color of the blink overlay
-    int blinkOpacity;  // Opacity value of the blink overlay (percent)
 
 };
 

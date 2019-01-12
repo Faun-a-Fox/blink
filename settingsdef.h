@@ -2,7 +2,7 @@
 #define SETTINGSDEF
 
 #define SET_VERSION_MAJOR 1
-#define SET_VERSION_MINOR 0
+#define SET_VERSION_MINOR 1
 
 #define SET_FILENAME "BlinkConfig.ini"
 
@@ -12,10 +12,10 @@
 #define SET_BLINKCOLOR_STR "blinkColor"
 #define SET_BLINKOPACITY_INT "blinkOpacity"
 
-#define SET_BLINKTIMERENABLED_BOOL "blinkTimerEnabled"
-#define SET_BLINKTIMERHEIGHT_INT "blinkTimerHeight"
-#define SET_BLINKTIMERCOLOR_STR "blinkTimerColor"
-#define SET_BLINKTIMEROPACITY_INT "blinkTimerOpacity"
+#define SET_TIMERENABLED_BOOL "blinkTimerEnabled"
+#define SET_TIMERHEIGHT_INT "blinkTimerHeight"
+#define SET_TIMERCOLOR_STR "blinkTimerColor"
+#define SET_TIMEROPACITY_INT "blinkTimerOpacity"
 
 #endif // SETTINGSDEF
 

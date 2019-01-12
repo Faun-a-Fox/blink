@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QSettings>
 
+#include <QLineEdit>
+
 namespace Ui {
 class SettingsDialog;
 }
@@ -19,6 +21,9 @@ public:
 private:
     QSettings *settings;
     Ui::SettingsDialog *ui;
+
+    void querryColor(QLineEdit *);
+    void updatePalette(QLineEdit *);
 };
 
 #endif // SETTINGSDIALOG_H

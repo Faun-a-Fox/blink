@@ -9,8 +9,8 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setApplicationName("Blink");
     QCoreApplication::setApplicationVersion(QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
-    QCoreApplication::setOrganizationName("Faun-a-Fox");
-    QCoreApplication::setOrganizationDomain("https://github.com/Faun-a-Fox/blink");
+    QCoreApplication::setOrganizationName("Faun-a");
+    QCoreApplication::setOrganizationDomain("https://github.com/faun-a/blink");
 
     QGuiApplication::setQuitOnLastWindowClosed(false);
 
